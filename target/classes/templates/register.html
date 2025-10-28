@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Register - Secret Chat</title>
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.2.3/css/bootstrap.min.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .register-container {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+    }
+    .register-card {
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+    .register-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 20px 20px 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+          <div class="card register-card">
+            <div class="card-header register-header text-center py-4">
+              <h2><i class="fas fa-shield-alt"></i> Secret Chat</h2>
+              <p class="mb-0">Join the secure messaging platform</p>
+            </div>
+            <div class="card-body p-4">
+              <h4 class="text-center mb-4">Create Account</h4>
+              <form th:action="@{/register}" method="post" th:object="${user}">
+                <div class="mb-3">
+                  <label class="form-label">
+                    <i class="fas fa-user"></i> Username
+                  </label>
+                  <input type="text" class="form-control" th:field="*{username}" 
+                         placeholder="Choose a unique username" required/>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">
+                    <i class="fas fa-id-card"></i> Full Name
+                  </label>
+                  <input type="text" class="form-control" th:field="*{fullname}" 
+                         placeholder="Enter your full name" required/>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">
+                    <i class="fas fa-lock"></i> Password
+                  </label>
+                  <input type="password" class="form-control" th:field="*{password}" 
+                         placeholder="Create a secure password" required/>
+                </div>
+                <button class="btn btn-success w-100 py-2">
+                  <i class="fas fa-user-plus"></i> Create Account
+                </button>
+              </form>
+              <div class="text-center mt-3">
+                <p class="mb-0">Already have an account? 
+                  <a th:href="@{/login}" class="text-decoration-none">
+                    <i class="fas fa-sign-in-alt"></i> Login here
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

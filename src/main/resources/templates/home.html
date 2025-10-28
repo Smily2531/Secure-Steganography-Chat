@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Secret Chat Home</title>
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.2.3/css/bootstrap.min.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .hero-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 3rem 0;
+      margin-bottom: 2rem;
+      border-radius: 15px;
+    }
+    .contact-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: none;
+      border-radius: 15px;
+    }
+    .contact-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .contact-card .card-body {
+      padding: 1.5rem;
+    }
+  </style>
+</head>
+<body class="container mt-4">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-shield-alt"></i> Secret Chat
+      </a>
+      <div class="navbar-nav ms-auto">
+        <span class="navbar-text me-3">
+          <i class="fas fa-user"></i> Welcome, <strong th:text="${me.fullname}">Me</strong>
+        </span>
+        <a href="/logout" class="btn btn-outline-danger">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero-section text-center">
+    <h1><i class="fas fa-lock"></i> Secure Steganography Chat</h1>
+    <p class="lead">Send secret messages hidden inside images. Only you and your contact can see the hidden content!</p>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <h4 class="mb-4"><i class="fas fa-users"></i> Your Contacts</h4>
+      <div th:if="${users.size() <= 1}" class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No other users found. Register another account to start chatting!
+      </div>
+      <div class="row" th:if="${users.size() > 1}">
+        <div th:each="u: ${users}" th:if="${u.username} != ${me.username}" class="col-md-6 mb-3">
+          <div class="card contact-card h-100">
+            <div class="card-body text-center">
+              <div class="mb-3">
+                <i class="fas fa-user-circle fa-3x text-primary"></i>
+              </div>
+              <h5 class="card-title" th:text="${u.fullname}">Contact Name</h5>
+              <p class="text-muted" th:text="'@' + ${u.username}">@username</p>
+              <a th:href="@{'/msg/chat/' + ${u.id}}" class="btn btn-primary">
+                <i class="fas fa-comments"></i> Start Secret Chat
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-info-circle"></i> How it works</h5>
+        </div>
+        <div class="card-body">
+          <ol class="list-group list-group-flush">
+            <li class="list-group-item border-0 px-0">
+              <strong>1.</strong> Choose a contact to chat with
+            </li>
+            <li class="list-group-item border-0 px-0">
+              <strong>2.</strong> Upload an image and type your secret message
+            </li>
+            <li class="list-group-item border-0 px-0">
+              <strong>3.</strong> Your message gets hidden inside the image
+            </li>
+            <li class="list-group-item border-0 px-0">
+              <strong>4.</strong> Receiver clicks the image to reveal the message
+            </li>
+          </ol>
+        </div>
+      </div>
+      
+      <div class="card mt-3">
+        <div class="card-body">
+          <h6><i class="fas fa-shield-alt"></i> Security Features</h6>
+          <ul class="list-unstyled small">
+            <li><i class="fas fa-check text-success"></i> Messages hidden in image pixels</li>
+            <li><i class="fas fa-check text-success"></i> No visible text in chat</li>
+            <li><i class="fas fa-check text-success"></i> Only intended recipient can decode</li>
+            <li><i class="fas fa-check text-success"></i> Steganography encryption</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

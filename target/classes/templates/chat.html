@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Secret Chat</title>
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.2.3/css/bootstrap.min.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .message-card {
+      border-left: 4px solid #007bff;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    .hidden-message {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      border: 1px solid #c3e6cb;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 10px;
+    }
+    .image-container {
+      position: relative;
+      display: inline-block;
+    }
+    .image-container img {
+      transition: transform 0.3s ease;
+      cursor: pointer;
+      max-width: 400px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+    }
+    .image-container img:hover {
+      transform: scale(1.05);
+      border-color: #007bff;
+    }
+  </style>
+  <script>
+// Add event listeners when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Reveal Hidden Message buttons
+  document.querySelectorAll('.decode-reveal-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const path = this.getAttribute('data-image-path');
+      const id = this.getAttribute('data-message-id');
+      decodeMsg(path, id);
+    });
+  });
+  
+  // Download buttons
+  document.querySelectorAll('.download-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const path = this.getAttribute('data-image-path');
+      const id = this.getAttribute('data-message-id');
+      downloadImage(path, 'encoded-message-' + id + '.png');
+    });
+  });
+});
+
+function decodeMsg(path, id) {
+  const button = document.getElementById('decode-btn-' + id);
+  const resultDiv = document.getElementById('decoded-' + id);
+  
+  if (!resultDiv) {
+    console.error('Result div not found for id:', id);
+    return;
+  }
+  
+  if (button && button.disabled) return;
+  
+  if (button) {
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Decoding...';
+  }
+  resultDiv.innerHTML = '';
+  
+  console.log('Decoding path:', path, 'Message ID:', id);
+  
+  fetch('/msg/decodeMessage?path=' + encodeURIComponent(path))
+    .then(response => {
+      console.log('Response status:', response.status);
+      return response.text();
+    })
+    .then(data => {
+      console.log('Decoded result:', data);
+      resultDiv.innerHTML = data;
+      if (button) {
+        button.style.display = 'none';
+      }
+    })
+    .catch(e => {
+      console.error('Error decoding message:', e);
+      resultDiv.innerHTML = '<div class="alert alert-danger">⚠ Error: ' + e.message + '</div>';
+      if (button) {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-key"></i> Reveal Hidden Message';
+      }
+    });
+}
+
+function decodeUploadedImage() {
+  const fileInput = document.getElementById('decodeImageFile');
+  const resultDiv = document.getElementById('decoded-upload');
+  
+  if (!fileInput.files || !fileInput.files[0]) {
+    resultDiv.innerHTML = '<div class="alert alert-warning">Please select an image first</div>';
+    return;
+  }
+  
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+  
+  resultDiv.innerHTML = '<div class="alert alert-info"><span class="spinner-border spinner-border-sm" role="status"></span> Decoding image...</div>';
+  
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        console.log('Image dimensions:', img.width, 'x', img.height);
+        
+        const msg = decodeLSB(data, img.width, img.height);
+        console.log('Decoded message:', msg);
+        
+        if (msg && msg.trim().length > 0) {
+          resultDiv.innerHTML = '<div class="alert alert-success"><strong>💬 Hidden Message Found:</strong><br>' + escapeHtml(msg) + '</div>';
+        } else {
+          resultDiv.innerHTML = '<div class="alert alert-info">⚠ No hidden message found in this image. Make sure it was encoded with this tool.</div>';
+        }
+      } catch (err) {
+        console.error('Decode error:', err);
+        resultDiv.innerHTML = '<div class="alert alert-danger">⚠ Error: ' + err.message + '</div>';
+      }
+    };
+    img.onerror = function() {
+      resultDiv.innerHTML = '<div class="alert alert-danger">⚠ Error loading image</div>';
+    };
+    img.src = e.target.result;
+  };
+  
+  reader.readAsDataURL(file);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function decodeLSB(data, w, h) {
+  const capacity = w * h;
+  
+  if (capacity < 4) return null;
+  
+  // Read length (32 bits)
+  let lenBytes = new Array(4).fill(0);
+  let idx = 0;
+  
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const pos = (y * w + x) * 4;
+      const blue = data[pos + 2];
+      const bit = blue & 1;
+      
+      lenBytes[Math.floor(idx / 8)] = (lenBytes[Math.floor(idx / 8)] << 1) | bit;
+      idx++;
+      if (idx >= 32) break;
+    }
+    if (idx >= 32) break;
+  }
+  
+  const dataLen = (lenBytes[0] << 24) | (lenBytes[1] << 16) | (lenBytes[2] << 8) | lenBytes[3];
+  
+  if (dataLen <= 0 || dataLen > capacity - 4 || dataLen > 100000) {
+    return null;
+  }
+  
+  // Read message - same algorithm as Java
+  let messageBytes = new Array(dataLen).fill(0);
+  idx = 0;
+  
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (idx < 32) {
+        idx++;
+        continue;
+      }
+      
+      if (idx >= (4 + dataLen) * 8) break;
+      
+      const pos = (y * w + x) * 4;
+      const blue = data[pos + 2];
+      const bit = blue & 1;
+      
+      // Extract the bit from the correct position in the byte
+      const bytePosition = Math.floor((idx - 32) / 8);
+      const bitPosition = (idx - 32) % 8;
+      
+      messageBytes[bytePosition] = messageBytes[bytePosition] | (bit << (7 - bitPosition));
+      
+      idx++;
+      
+      if (idx >= (4 + dataLen) * 8) break;
+    }
+    if (idx >= (4 + dataLen) * 8) break;
+  }
+  
+  if (dataLen === 0) return null;
+  
+  const str = String.fromCharCode.apply(null, messageBytes);
+  return str;
+}
+
+function downloadImage(imagePath, fileName) {
+  try {
+    console.log('Downloading:', imagePath, 'as', fileName);
+    const link = document.createElement('a');
+    link.href = imagePath;
+    link.download = fileName || 'encoded-image.png';
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      document.body.removeChild(link);
+    }, 100);
+  } catch (e) {
+    console.error('Download error:', e);
+    alert('Download failed. Try right-clicking on the image and selecting "Save image as..."');
+  }
+}
+</script>
+</head>
+<body class="container mt-4">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" th:href="@{/home}">🔒 Secret Chat</a>
+      <span class="navbar-text">Chatting with <strong th:text="${other.fullname}">Other</strong></span>
+    </div>
+  </nav>
+
+  <div class="row">
+    <div class="col-md-8">
+      <h5 class="mb-3"><i class="fas fa-envelope"></i> Messages</h5>
+      <div th:if="${inbox.size()}==0" class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No messages yet. Send a secret message to start the conversation!
+      </div>
+
+      <div th:each="m, stat : ${inbox}">
+        <div class="card mb-4 message-card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+              <i class="fas fa-clock"></i> <span th:text="${m.sentAt}"></span>
+            </small>
+            <span class="badge bg-primary">Secret Message</span>
+          </div>
+          <div class="card-body">
+            <div class="image-container mb-3">
+              <img th:src="${m.imagePath}" alt="Encoded Image" class="img-fluid rounded shadow-sm" />
+            </div>
+            <div class="mt-3 d-flex gap-2 flex-wrap">
+              <button class="btn btn-outline-primary btn-sm decode-reveal-btn" 
+                      th:id="'decode-btn-' + ${m.id}"
+                      th:attr="data-image-path=${m.imagePath}, data-message-id=${m.id}">
+                <i class="fas fa-key"></i> Reveal Hidden Message
+              </button>
+              <button class="btn btn-outline-success btn-sm download-btn" 
+                      th:attr="data-image-path=${m.imagePath}, data-message-id=${m.id}">
+                <i class="fas fa-download"></i> Download Image
+              </button>
+            </div>
+            <div th:id="'decoded-' + ${m.id}" class="mt-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-paper-plane"></i> Send Secret Message</h5>
+        </div>
+        <div class="card-body">
+          <form th:action="@{'/msg/send/' + ${other.id}}" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="fas fa-image"></i> Choose Image (PNG/JPG)
+              </label>
+              <input type="file" name="image" class="form-control" accept="image/*" required/>
+              <div class="form-text">Select an image to hide your message in</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="fas fa-key"></i> Secret Message
+              </label>
+              <textarea name="text" class="form-control" rows="4" 
+                        placeholder="Type your secret message here..." required></textarea>
+              <div class="form-text">Message will be hidden in the image</div>
+            </div>
+            <button type="submit" class="btn btn-success w-100">
+              <i class="fas fa-paper-plane"></i> Send Secret Message
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-search"></i> Decode Any Image</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Upload Image to Decode</label>
+            <input type="file" id="decodeImageFile" class="form-control" accept="image/*"/>
+            <div class="form-text">Select any steganography image to reveal hidden text</div>
+          </div>
+          <button class="btn btn-primary w-100" onclick="decodeUploadedImage()">
+            <i class="fas fa-key"></i> Decode Message
+          </button>
+          <div id="decoded-upload" class="mt-3"></div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-body">
+          <h6><i class="fas fa-info-circle"></i> How it works:</h6>
+          <ul class="list-unstyled small">
+            <li>✓ Upload an image</li>
+            <li>✓ Type your secret message</li>
+            <li>✓ Message gets hidden in the image</li>
+            <li>✓ Only images are stored (no text)</li>
+            <li>✓ Receiver clicks "Reveal" to see the message</li>
+            <li>✓ Download images anytime</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
