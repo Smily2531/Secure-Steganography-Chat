@@ -27,7 +27,7 @@ Eclipse or IntelliJ IDEA
 
 Download or clone the repository
 
-git clone https://github.com/yourusername/OnlineStegoProject.git
+git clone https://github.com/Smily2531/OnlineStegoProject.git
 
 
 Import into Eclipse or IntelliJ
