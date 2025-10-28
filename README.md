@@ -180,7 +180,7 @@ OnlineStegoProject/
 
 #### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/OnlineStegoProject.git
+git clone https://github.com/Smily2531/OnlineStegoProject.git
 cd OnlineStegoProject
 ```
 
@@ -590,7 +590,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👤 Author
 
 **Your Name**
-- Email: your.email@example.com
+- N Smily
 - GitHub: [@Smily2531](https://github.com/Smily2531)
 
 ---
