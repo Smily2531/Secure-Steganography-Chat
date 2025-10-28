@@ -140,7 +140,7 @@ Add image preview before and after encoding.
 
 Nakka Smily
 📍 B.Tech CSE - Aditya College of Engineering & Technology (A)
-🧠 Skills: Java, Spring Boot, R, JavaScript, HTML, CSS
+
 
 📜 License
 
