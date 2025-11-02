@@ -1,4 +1,4 @@
-![WhatsApp Image 2025-11-02 at 16 47 54_92d347b3](https://github.com/user-attachments/assets/8a8d70d1-dc79-485c-9217-5db82048e262)# 🔐 Online Steganography Messenger
+ 🔐 Online Steganography Messenger
 
 > A secure Spring Boot messaging application that hides text messages inside images using LSB (Least Significant Bit) steganography
 
