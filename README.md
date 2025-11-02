@@ -1,4 +1,4 @@
-# 🔐 Online Steganography Messenger
+![WhatsApp Image 2025-11-02 at 16 47 54_92d347b3](https://github.com/user-attachments/assets/8a8d70d1-dc79-485c-9217-5db82048e262)# 🔐 Online Steganography Messenger
 
 > A secure Spring Boot messaging application that hides text messages inside images using LSB (Least Significant Bit) steganography
 
@@ -328,11 +328,18 @@ Blue:      10010111 (last bit = 1)
 1. Navigate to `http://localhost:8081/register`
 2. Create username and password
 3. Click "Register"
+4.<img width="1635" height="951" alt="image" src="https://github.com/user-attachments/assets/7a2555d7-1698-4f9a-be61-6f15492e603a" />
+
+
 
 #### 2. Login
 1. Go to `http://localhost:8081/login`
 2. Enter credentials
 3. Access your dashboard
+4. <img width="1607" height="933" alt="image" src="https://github.com/user-attachments/assets/05c3681a-e031-4922-884e-775e318797cc" />
+5.<img width="1609" height="974" alt="image" src="https://github.com/user-attachments/assets/e503a8d6-cb52-410d-a2d5-db9214e4b952" />
+
+
 
 #### 3. Send a Message
 1. From home page, select a contact
@@ -340,22 +347,34 @@ Blue:      10010111 (last bit = 1)
 3. Type your secret message
 4. Click "Send Message"
 5. Image is encoded and stored
+6. <img width="1492" height="746" alt="image" src="https://github.com/user-attachments/assets/398c8e4b-e672-49f3-97c6-c80edf121d24" />
+7.<img width="1585" height="974" alt="image" src="https://github.com/user-attachments/assets/f49618a5-2c81-47bb-9097-60decea85ca6" />
+
+
 
 #### 4. Read Messages
 1. Navigate to chat page
 2. Click "Reveal Hidden Message" button
 3. Decoded text displays instantly
+4. <img width="1059" height="904" alt="image" src="https://github.com/user-attachments/assets/7bcad09e-bf26-4e03-8aed-53b906972bd7" />
+5. <img width="1426" height="909" alt="image" src="https://github.com/user-attachments/assets/2d8c856d-467f-4fc1-a02f-87850c3f6418" />
+
+
 
 #### 5. Download Images
 - Click "Download Image" button on any message
 - Save to local device
 - Can decode later or use external tools
+- <img width="1700" height="984" alt="image" src="https://github.com/user-attachments/assets/03cf6c29-3c8b-40cb-89d3-3fd64ad264fc" />
+
 
 #### 6. Decode External Images
 1. Scroll to "Decode Any Image" section
 2. Click "Choose File"
 3. Upload any steganography image
 4. Hidden message appears automatically
+5. <img width="532" height="405" alt="image" src="https://github.com/user-attachments/assets/befee051-a4d0-43ac-a384-2ba7f7b290dd" />
+
 
 ### For Developers
 
